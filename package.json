@@ -1,0 +1,39 @@
+{
+  "name": "trello-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint src --ext js --report-unused-disable-directives --max-warnings 0",
+    "clean": "rm -rf build && mkdir build",
+    "build-babel": "babel ./src -d ./build/src",
+    "build": "npm run clean && npm run build-babel",
+    "production": "npm run build && cross-env BUILD_MODE=production node ./build/src/server.js",
+    "dev": "cross-env BUILD_MODE=dev nodemon --exec babel-node ./src/server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/runtime": "^7.24.8",
+    "async-exit-hook": "^2.0.1",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "express": "^4.19.2",
+    "http-status-codes": "^2.3.0",
+    "joi": "^17.13.3",
+    "lodash": "^4.17.21",
+    "mongodb": "^6.8.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.8",
+    "@babel/core": "^7.24.9",
+    "@babel/eslint-parser": "^7.24.8",
+    "@babel/node": "^7.24.8",
+    "@babel/plugin-transform-runtime": "^7.24.7",
+    "@babel/preset-env": "^7.24.8",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.7.0",
+    "nodemon": "^3.1.4"
+  }
+}
