@@ -1,10 +1,8 @@
-import { ObjectId } from "mongodb";
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from "~/utils/validators"
+import Joi from "joi"
 
-const { GET_DB } = require("~/config/database")
-const Joi = require("joi")
-
-const ACCOUNT_COLLECTION_NAME = "cards";
-const ACCOUNT_COLLECTION_SCHEMA = Joi.object({
+const CARD_COLLECTION_NAME = "cards"
+const CARD_COLLECTION_SCHEMA = Joi.object({
   boardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   columnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
 
@@ -14,15 +12,9 @@ const ACCOUNT_COLLECTION_SCHEMA = Joi.object({
   createAt: Joi.date().timestamp("javascript").default(Date.now),
   updateAt: Joi.date().timestamp("javascript").default(null),
   _destroy: Joi.boolean().default(false),
-});
+})
 
-// Thực hiện kiểm tra dữ liệu trước khi tạo mới trong model
-const validateBeforeCreate = async (data) => {
-  return ACCOUNT_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
+export const cardModel = {
+  CARD_COLLECTION_NAME,
+  CARD_COLLECTION_SCHEMA
 }
-
-
-
-export const boardModel = {
-
-};

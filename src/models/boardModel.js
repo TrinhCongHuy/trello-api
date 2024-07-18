@@ -1,10 +1,11 @@
 import { ObjectId } from "mongodb";
+import { columnModel } from "./columnModel";
+import { cardModel } from "./cardModel";
+import { GET_DB } from "~/config/database"
+import Joi from "joi"
 
-const { GET_DB } = require("~/config/database")
-const Joi = require("joi")
-
-const ACCOUNT_COLLECTION_NAME = "boards";
-const ACCOUNT_COLLECTION_SCHEMA = Joi.object({
+const BOARD_COLLECTION_NAME = "boards";
+const BOARD_COLLECTION_SCHEMA = Joi.object({
   title: Joi.string().required().min(3).max(50).trim().strict(),
   description: Joi.string().required().min(3).max(255).trim().strict(),
   slug: Joi.string().required().min(3).max(50).trim().strict(),
@@ -20,13 +21,13 @@ const ACCOUNT_COLLECTION_SCHEMA = Joi.object({
 
 // Thực hiện kiểm tra dữ liệu trước khi tạo mới trong model
 const validateBeforeCreate = async (data) => {
-  return ACCOUNT_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
+  return BOARD_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
 }
 
 // [GET] /boards/
 const boards = async () => {
   try {
-    const result = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).find()
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).find()
     const listBoard = await result.toArray()
 
     return listBoard
@@ -39,7 +40,7 @@ const boards = async () => {
 const addBoard = async (data) => {
   try {
     const validData = await validateBeforeCreate(data)
-    const newBoard = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).insertOne(validData)
+    const newBoard = await GET_DB().collection(BOARD_COLLECTION_NAME).insertOne(validData)
     return newBoard
   } catch (error) {
     throw new Error(error)
@@ -49,7 +50,7 @@ const addBoard = async (data) => {
 // [GET] /boards/:id
 const findOneById = async (id) => {
   try {
-    const board = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).findOne({
+    const board = await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({
       _id: new ObjectId(id)
     })
     return board
@@ -61,10 +62,35 @@ const findOneById = async (id) => {
 // [GET] /boards/:id
 const getDetail = async (id) => {
   try {
-    const board = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).findOne({
-      _id: new ObjectId(id)
-    })
-    return board
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
+      { 
+        $match: 
+          {
+            _id: new ObjectId(id),
+            _destroy: false
+          } 
+      },
+      {
+        $lookup:
+          {
+            from: columnModel.COLUMN_COLLECTION_NAME,
+            localField: '_id',
+            foreignField: 'boardId',
+            as: 'columns'
+          }
+      },
+      {
+        $lookup:
+          {
+            from: cardModel.CARD_COLLECTION_NAME,
+            localField: '_id',
+            foreignField: 'boardId',
+            as: 'cards'
+          }
+      }
+    ]).toArray()
+
+    return result[0] || null
   } catch (error) {
     throw new Error(error)
   }

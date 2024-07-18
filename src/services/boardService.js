@@ -1,8 +1,9 @@
 import { StatusCodes } from "http-status-codes"
 import ApiError from "~/utils/ApiError"
 
-const { boardModel } = require("~/models/boardModel")
-const { slugify } = require("~/utils/formatters")
+import { boardModel } from "~/models/boardModel"
+import { slugify } from "~/utils/formatters"
+import { cloneDeep } from "lodash"
 
 // [GET] /boards/
 const boards = async () => {
@@ -26,6 +27,7 @@ const addBoard = async (data) => {
     const board = await boardModel.findOneById(
       createBoard.insertedId.toString()
     )
+
     return board
   } catch (error) {
     throw error
@@ -39,7 +41,18 @@ const detailBoard = async (boardId) => {
     if (!board) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
     }
-    return board
+
+    const resBoard = cloneDeep(board)
+    
+    // Lặp qua all các columns của board và gán all card có _id === columnId 
+    resBoard.columns.forEach(column => {
+      column.cards = resBoard.cards.filter(card => card.columnId.equals(column._id))
+    });
+
+    // Sau khi gán xong thì xoá cards ở bên ngoài
+    delete resBoard.cards
+
+    return resBoard
   } catch (error) {
     throw error
   }

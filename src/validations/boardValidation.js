@@ -1,7 +1,7 @@
-import ApiError from "~/utils/ApiError";
+import ApiError from "~/utils/ApiError"
 
-const Joi = require("joi");
-const { StatusCodes } = require("http-status-codes");
+import Joi from "joi"
+import { StatusCodes } from "http-status-codes"
 
 const addBoard = async (req, res, next) => {
   const correctCondition = Joi.object({
@@ -15,15 +15,15 @@ const addBoard = async (req, res, next) => {
       'string.empty': 'description cannot be empty.',
       'string.trim': 'description must not have leading or trailing whitespace.'
     })
-  });
+  })
 
   try {
-    await correctCondition.validateAsync(req.body, { abortEarly: false });
+    await correctCondition.validateAsync(req.body, { abortEarly: false })
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
-};
+}
 
 export const boardValidation = {
   addBoard
