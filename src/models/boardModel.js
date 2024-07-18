@@ -1,14 +1,17 @@
+import { ObjectId } from "mongodb";
+
 const { GET_DB } = require("~/config/database")
 const Joi = require("joi")
 
 const ACCOUNT_COLLECTION_NAME = "boards";
 const ACCOUNT_COLLECTION_SCHEMA = Joi.object({
-  title: Joi.string().required().trim().strict(),
-  description: Joi.string().required().trim().strict(),
-  type: Joi.string().valid('public', 'private').required().trim().strict(),
-  ownerIds: Joi.array().items(Joi.string()).required(),
-  memberIds: Joi.array().items(Joi.string()).required(), 
-  columnOrderIds: Joi.array().items(Joi.string()).required(),
+  title: Joi.string().required().min(3).max(50).trim().strict(),
+  description: Joi.string().required().min(3).max(255).trim().strict(),
+  slug: Joi.string().required().min(3).max(50).trim().strict(),
+  type: Joi.string().valid('public', 'private').default('private'), 
+  ownerIds: Joi.array().items(Joi.string()).default([]),
+  memberIds: Joi.array().items(Joi.string()).default([]),
+  columnOrderIds: Joi.array().items(Joi.string()).default([]),
 
   createAt: Joi.date().timestamp("javascript").default(Date.now),
   updateAt: Joi.date().timestamp("javascript").default(null),
@@ -20,6 +23,7 @@ const validateBeforeCreate = async (data) => {
   return ACCOUNT_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
 }
 
+// [GET] /boards/
 const boards = async () => {
   try {
     const result = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).find()
@@ -31,6 +35,44 @@ const boards = async () => {
   }
 };
 
+//  [POST] /boards/add-board
+const addBoard = async (data) => {
+  try {
+    const validData = await validateBeforeCreate(data)
+    const newBoard = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).insertOne(validData)
+    return newBoard
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// [GET] /boards/:id
+const findOneById = async (id) => {
+  try {
+    const board = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).findOne({
+      _id: new ObjectId(id)
+    })
+    return board
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// [GET] /boards/:id
+const getDetail = async (id) => {
+  try {
+    const board = await GET_DB().collection(ACCOUNT_COLLECTION_NAME).findOne({
+      _id: new ObjectId(id)
+    })
+    return board
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const boardModel = {
   boards,
+  addBoard,
+  findOneById,
+  getDetail
 };
