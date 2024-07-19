@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, ReturnDocument } from "mongodb";
 import { columnModel } from "./columnModel";
 import { cardModel } from "./cardModel";
 import { GET_DB } from "~/config/database"
@@ -96,9 +96,25 @@ const getDetail = async (id) => {
   }
 }
 
+// push columnId vào cuối mảng columnOrderIds
+const pushColumnOrderIds = (column) => {
+  try {
+    const result = GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(column.boardId) },
+      { $push: { columnOrderIds: new ObjectId(column._id) } },
+      { ReturnDocument: 'after' }
+    )
+
+    return result.value
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const boardModel = {
   boards,
   addBoard,
   findOneById,
-  getDetail
+  getDetail,
+  pushColumnOrderIds
 };
