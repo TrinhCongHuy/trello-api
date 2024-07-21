@@ -25,6 +25,22 @@ const addColumn = async (data) => {
   }
 }
 
+// [PUT] /columns/:id
+const updateColumn = async (columnId, reqBody) => {
+  try {
+    const updateData = {
+      ...reqBody,
+      updatedAt: Date.now()
+    }
+    const column = await columnModel.update(columnId, updateData)
+    return column
+  } catch (error) {
+    throw error
+  }
+}
+
+
 export const columnService = {
-  addColumn
+  addColumn,
+  updateColumn
 }

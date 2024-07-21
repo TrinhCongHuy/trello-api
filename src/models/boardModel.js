@@ -105,7 +105,26 @@ const pushColumnOrderIds = (column) => {
       { ReturnDocument: 'after' }
     )
 
-    return result.value
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// update columnOrderIds khi kéo thả column
+const update = (boardId, updateData) => {
+  try {
+    if (updateData.columnOrderIds) {
+      updateData.columnOrderIds = updateData.columnOrderIds.map(id => new ObjectId(id))
+    }
+
+    const result = GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(boardId) },
+      { $set: updateData },
+      { ReturnDocument: 'after' }
+    )
+
+    return result
   } catch (error) {
     throw new Error(error)
   }
@@ -116,5 +135,6 @@ export const boardModel = {
   addBoard,
   findOneById,
   getDetail,
-  pushColumnOrderIds
+  pushColumnOrderIds,
+  update
 };

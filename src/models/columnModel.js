@@ -55,7 +55,26 @@ const pushCardOrderIds = (card) => {
       { ReturnDocument: 'after' }
     )
 
-    return result.value
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// update cardOrderIds khi kéo thả card trong cùng 1 column
+const update = (columnId, updateData) => {
+  try {
+    if (updateData.cardOrderIds) {
+      updateData.cardOrderIds = updateData.cardOrderIds.map(id => new ObjectId(id))
+    }
+
+    const result = GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(columnId) },
+      { $set: updateData },
+      { ReturnDocument: 'after' }
+    )
+
+    return result
   } catch (error) {
     throw new Error(error)
   }
@@ -66,5 +85,6 @@ export const columnModel = {
   COLUMN_COLLECTION_SCHEMA,
   addColumn,
   findOneById,
-  pushCardOrderIds
+  pushCardOrderIds,
+  update
 };

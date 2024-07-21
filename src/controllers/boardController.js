@@ -36,8 +36,33 @@ const detailBoard = async (req, res, next) => {
   }
 };
 
+// [PUT] /boards/:id
+const updateBoard = async (req, res, next) => {
+  try {
+    const boardId = req.params.id
+    const updatedBoard = await boardService.updateBoard(boardId, req.body)
+
+    res.status(StatusCodes.OK).json(updatedBoard)
+  } catch (error) {
+    next(error)
+  }
+};
+
+// [PUT] /boards/supports/moving_card
+const moveCardToDifferentColumn = async (req, res, next) => {
+  try {
+    const result = await boardService.moveCardToDifferentColumn(req.body)
+
+    res.status(StatusCodes.OK).json(result) 
+  } catch (error) {
+    next(error)
+  }
+};
+
 export const boardController = {
   boards,
   addBoard,
-  detailBoard
+  detailBoard,
+  updateBoard,
+  moveCardToDifferentColumn
 };

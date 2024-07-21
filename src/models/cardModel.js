@@ -50,9 +50,27 @@ const findOneById = async (id) => {
   }
 }
 
+// update columnId khi kéo thả card từ column này sang column khác
+const update = (cardId, updateData) => {
+  try {
+    if (updateData.columnId) updateData.columnId = new ObjectId(updateData.columnId)
+
+    const result = GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(cardId) },
+      { $set: updateData },
+      { ReturnDocument: 'after' }
+    )
+
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const cardModel = {
   CARD_COLLECTION_NAME,
   CARD_COLLECTION_SCHEMA,
   addCard,
-  findOneById
+  findOneById,
+  update
 }

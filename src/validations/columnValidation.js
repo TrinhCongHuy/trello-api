@@ -10,6 +10,8 @@ const addColumn = async (req, res, next) => {
     title: Joi.string().required().min(3).max(50).trim().strict().messages({
       "any.required": "Full Name is required.",
       "string.empty": "Full Name cannot be empty.",
+      "string.min": "Full Name must be at least 3 characters long.",
+      "string.max": "Full Name must be at most 50 characters long.",
       "string.trim": "Full Name must not have leading or trailing whitespace.",
     }) 
   })
@@ -22,6 +24,24 @@ const addColumn = async (req, res, next) => {
   }
 }
 
+const update = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    title: Joi.string().min(3).max(50).trim().strict(),
+    cardOrderIds: Joi.array().items(Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)),
+  })
+
+  try {
+    await correctCondition.validateAsync(req.body, { 
+      abortEarly: false,
+      allowUnknown: true
+    })
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
+  }
+}
+
 export const columnValidation = {
-  addColumn
+  addColumn,
+  update
 }
