@@ -6,11 +6,12 @@ import { slugify } from "~/utils/formatters"
 import { cloneDeep } from "lodash"
 import { columnModel } from "~/models/columnModel"
 import { cardModel } from "~/models/cardModel"
+import { userModel } from "~/models/userModel"
 
 // [GET] /boards/
-const boards = async () => {
+const boards = async (userId) => {
   try {
-    const boards = await boardModel.boards()
+    const boards = await boardModel.boards(userId)
     return boards
   } catch (error) {
     throw error
@@ -18,17 +19,23 @@ const boards = async () => {
 }
 
 // [POST] /boards/add-board
-const addBoard = async (data) => {
+const addBoard = async (newBoard, userId) => {
   try {
-    const newBoard = {
-      ...data,
-      slug: slugify(data.title),
+  
+    const dataNewBoard = {
+      ...newBoard,
+      ownerId: userId,
+      slug: slugify(newBoard.title),
     }
 
-    const createBoard = await boardModel.addBoard(newBoard)
+    const createBoard = await boardModel.addBoard(dataNewBoard)
     const board = await boardModel.findOneById(
       createBoard.insertedId.toString()
     )
+
+    if (board) {
+      await userModel.pushBoardOrderIds(board)
+    }
 
     return board
   } catch (error) {
@@ -74,6 +81,20 @@ const updateBoard = async (boardId, reqBody) => {
   }
 }
 
+// [PUT] /boards/:id
+const addUserToBoard = async (boardId, userId, userInviteId) => {
+  try {
+    const updateData = {
+      ...reqBody,
+      updatedAt: Date.now()
+    }
+    const board = await boardModel.addMember(boardId, updateData)
+    return board
+  } catch (error) {
+    throw error
+  }
+}
+
 // [PUT] /boards/supports/moving_card
 const moveCardToDifferentColumn = async (reqBody) => {
   try {
@@ -106,5 +127,6 @@ export const boardService = {
   addBoard,
   detailBoard,
   updateBoard,
+  addUserToBoard,
   moveCardToDifferentColumn
 }

@@ -1,8 +1,9 @@
-const express = require("express")
+import express from "express"
 const router = express.Router()
-const { cardController } = require("~/controllers/cardController")
-const { cardValidation } = require("~/validations/cardValidation")
+import { cardController } from "~/controllers/cardController"
+import { authMiddleware } from "~/middlewares/authMiddleware"
+import { cardValidation } from "~/validations/cardValidation"
 
-router.post('/add-card', cardValidation.addCard, cardController.addCard)
+router.post('/add-card', authMiddleware.isAuthorized, cardValidation.addCard, cardController.addCard)
 
-module.exports = router
+export const cardRoute = router

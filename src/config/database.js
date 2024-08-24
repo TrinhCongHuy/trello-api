@@ -1,4 +1,4 @@
-require("dotenv").config()
+import 'dotenv/config'
 import { env } from "~/config/environment"
 import { MongoClient, ServerApiVersion } from "mongodb"
 

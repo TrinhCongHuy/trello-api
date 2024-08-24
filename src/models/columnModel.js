@@ -80,11 +80,25 @@ const update = (columnId, updateData) => {
   }
 }
 
+// delete column
+const deleteOneById = (columnId) => {
+  try {
+    const result = GET_DB().collection(COLUMN_COLLECTION_NAME).deleteOne(
+      { _id: new ObjectId(columnId) }
+    )
+
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const columnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
   addColumn,
   findOneById,
   pushCardOrderIds,
-  update
+  update,
+  deleteOneById
 };

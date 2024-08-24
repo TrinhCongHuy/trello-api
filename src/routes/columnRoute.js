@@ -1,10 +1,13 @@
-const express = require("express")
+import express from "express"
 const router = express.Router()
-const { columnController } = require("~/controllers/columnController")
-const { columnValidation } = require("~/validations/columnValidation")
+import { columnController } from "~/controllers/columnController"
+import { authMiddleware } from "~/middlewares/authMiddleware"
+import { columnValidation } from "~/validations/columnValidation"
 
-router.post('/add-column', columnValidation.addColumn, columnController.addColumn)
-router.put('/:id', columnValidation.update, columnController.updateColumn)
+router.post('/add-column', authMiddleware.isAuthorized, columnValidation.addColumn, columnController.addColumn)
+router.put('/:id', authMiddleware.isAuthorized, columnValidation.update, columnController.updateColumn)
+router.delete('/:id', authMiddleware.isAuthorized, columnValidation.deleteItem, columnController.deleteItem)
 
 
-module.exports = router
+
+export const columnRoute = router

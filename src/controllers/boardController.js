@@ -4,7 +4,8 @@ const { StatusCodes } = require("http-status-codes")
 // [GET] /boards/
 const boards = async (req, res, next) => {
   try {
-    const listBoard = await boardService.boards()
+    const userId = req.params.id
+    const listBoard = await boardService.boards(userId)
 
     res.status(StatusCodes.OK).json(listBoard)
   } catch (error) {
@@ -15,8 +16,9 @@ const boards = async (req, res, next) => {
 // [POST] /boards/add-board
 const addBoard = async (req, res, next) => {
   try {
+    const userId = req.jwtDecoded.id
     const newBoard = req.body
-    const board = await boardService.addBoard(newBoard)
+    const board = await boardService.addBoard(newBoard, userId)
 
     res.status(StatusCodes.CREATED).json(board)
   } catch (error) {
@@ -48,6 +50,20 @@ const updateBoard = async (req, res, next) => {
   }
 };
 
+// [PUT] /boards/:id
+const addUserToBoard = async (req, res, next) => {
+  try {
+    const boardId = req.params.id
+    const userId = req.body
+    const userInviteId = req.jwtDecoded.id
+    const result = await boardService.addUserToBoard(boardId, userId, userInviteId)
+
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+};
+
 // [PUT] /boards/supports/moving_card
 const moveCardToDifferentColumn = async (req, res, next) => {
   try {
@@ -64,5 +80,6 @@ export const boardController = {
   addBoard,
   detailBoard,
   updateBoard,
+  addUserToBoard,
   moveCardToDifferentColumn
 };

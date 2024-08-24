@@ -1,4 +1,4 @@
-import { ObjectId, ReturnDocument } from "mongodb";
+import { ObjectId } from "mongodb";
 import { columnModel } from "./columnModel";
 import { cardModel } from "./cardModel";
 import { GET_DB } from "~/config/database"
@@ -9,12 +9,12 @@ const BOARD_COLLECTION_SCHEMA = Joi.object({
   title: Joi.string().required().min(3).max(50).trim().strict(),
   description: Joi.string().required().min(3).max(255).trim().strict(),
   slug: Joi.string().required().min(3).max(50).trim().strict(),
-  type: Joi.string().valid('public', 'private').default('private'), 
-  ownerIds: Joi.array().items(Joi.string()).default([]),
+  type: Joi.string().valid('public', 'private').default('private'),
+  ownerId: Joi.string(),
   memberIds: Joi.array().items(Joi.string()).default([]),
   columnOrderIds: Joi.array().items(Joi.string()).default([]),
 
-  createAt: Joi.date().timestamp("javascript").default(Date.now),
+  createAt: Joi.date().timestamp("javascript").default(Date.now), 
   updateAt: Joi.date().timestamp("javascript").default(null),
   _destroy: Joi.boolean().default(false),
 });
@@ -25,9 +25,11 @@ const validateBeforeCreate = async (data) => {
 }
 
 // [GET] /boards/
-const boards = async () => {
+const boards = async (userId) => {
   try {
-    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).find()
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).find({
+      ownerId: new ObjectId(userId)
+    })
     const listBoard = await result.toArray()
 
     return listBoard
@@ -40,12 +42,28 @@ const boards = async () => {
 const addBoard = async (data) => {
   try {
     const validData = await validateBeforeCreate(data)
+    validData.ownerId = new ObjectId(data.ownerId)
+
     const newBoard = await GET_DB().collection(BOARD_COLLECTION_NAME).insertOne(validData)
     return newBoard
   } catch (error) {
     throw new Error(error)
   }
 }
+
+// Add member to board
+const addMember = async (boardId, userId, userInviteId) => {
+  try {
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(boardId), ownerId: new ObjectId(userId) },
+      { $addToSet: { memberIds: new ObjectId(userInviteId) } },
+      { returnDocument: 'after' }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 
 // [GET] /boards/:id
 const findOneById = async (id) => {
@@ -130,11 +148,28 @@ const update = (boardId, updateData) => {
   }
 }
 
+// pull columnId vào cuối mảng columnOrderIds
+const pullColumnOrderIds = (column) => {
+  try {
+    const result = GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(column.boardId) },
+      { $pull: { columnOrderIds: new ObjectId(column._id) } },
+      { ReturnDocument: 'after' }
+    )
+
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const boardModel = {
   boards,
   addBoard,
+  addMember,
   findOneById,
   getDetail,
   pushColumnOrderIds,
-  update
+  update,
+  pullColumnOrderIds
 };

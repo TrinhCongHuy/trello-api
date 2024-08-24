@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-const { StatusCodes } = require("http-status-codes");
-const { env } = require('~/config/environment')
+import { StatusCodes } from "http-status-codes"
+import { env } from '~/config/environment'
 
 // Middleware xử lý lỗi tập trung
 export const errorHandlingMiddleware = (err, req, res, next) => {
@@ -14,5 +14,5 @@ export const errorHandlingMiddleware = (err, req, res, next) => {
 
   if (env.BUILD_MODE !== 'dev') delete responseError.stack
 
-  res.status(responseError.statusCode).json(responseError)
+  res.status(responseError.statusCode).json(responseError);
 }

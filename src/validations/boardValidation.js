@@ -8,16 +8,19 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from "~/utils/validators"
 const addBoard = async (req, res, next) => {
   const correctCondition = Joi.object({
     title: Joi.string().required().min(3).max(50).trim().strict().messages({
-      "any.required": "Full Name is required.",
-      "string.empty": "Full Name cannot be empty.",
-      "string.min": "Full Name must be at least 3 characters long.",
-      "string.max": "Full Name must be at most 50 characters long.",
-      "string.trim": "Full Name must not have leading or trailing whitespace.",
+      "any.required": "Title is required.",
+      "string.empty": "Title cannot be empty.",
+      "string.min": "Title must be at least 3 characters long.",
+      "string.max": "Title must be at most 50 characters long.",
+      "string.trim": "Title must not have leading or trailing whitespace.",
     }),
     description: Joi.string().required().min(3).max(255).trim().strict().messages({
-      'any.required': 'description is required.',
-      'string.empty': 'description cannot be empty.',
-      'string.trim': 'description must not have leading or trailing whitespace.'
+      'any.required': 'Description is required.',
+      'string.empty': 'Description cannot be empty.',
+      'string.trim': 'Description must not have leading or trailing whitespace.'
+    }),
+    type: Joi.string().valid('public', 'private').default('private').messages({
+      'any.only': 'Type must be one of the following values: public, private.',
     })
   })
 

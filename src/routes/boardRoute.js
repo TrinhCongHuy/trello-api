@@ -1,13 +1,15 @@
-const express = require("express")
+import express from "express"
 const router = express.Router()
-const { boardController } = require("~/controllers/boardController")
-const { boardValidation } = require("~/validations/boardValidation")
+import { boardController } from "~/controllers/boardController"
+import { authMiddleware } from "~/middlewares/authMiddleware"
+import { boardValidation } from "~/validations/boardValidation"
 
-router.get('/', boardController.boards)
-router.post('/add-board', boardValidation.addBoard, boardController.addBoard)
-router.get('/:id', boardController.detailBoard)
-router.put('/:id', boardValidation.update, boardController.updateBoard)
-router.put('/supports/moving_card', boardValidation.moveCardToDifferentColumn, boardController.moveCardToDifferentColumn)
+router.get('/:id', authMiddleware.isAuthorized, boardController.boards)
+router.post('/add-board', authMiddleware.isAuthorized, boardValidation.addBoard, boardController.addBoard)
+router.get('/detail/:id', authMiddleware.isAuthorized, boardController.detailBoard)
+router.put('/update-board/:id', authMiddleware.isAuthorized, boardValidation.update, boardController.updateBoard)
+router.put('/:id', authMiddleware.isAuthorized, boardController.addUserToBoard)
+router.put('/supports/moving_card', authMiddleware.isAuthorized, boardValidation.moveCardToDifferentColumn, boardController.moveCardToDifferentColumn)
 
 
-module.exports = router
+export const boardRoute = router
